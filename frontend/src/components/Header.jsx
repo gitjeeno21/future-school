@@ -1,102 +1,359 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
+/* ── nav link data ── */
+const navLinks = [
+  { name: 'Home',       href: '/' },
+  { name: 'About',      href: '/about' },
+  { name: 'Programs',   href: '/programs' },
+  { name: 'Admissions', href: '/admissions' },
+  { name: 'Gallery',    href: '/gallery' },
+  { name: 'Contact',    href: '/contact' },
+]
+
+/* ── top-bar contact items ── */
+const topBarItems = [
+  {
+    icon: (
+      <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+        strokeLinecap="round" strokeLinejoin="round"
+      />
+    ),
+    text: '+91 99628 26465',
+    href: 'tel:+919962826465',
+  },
+  {
+    icon: (
+      <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+        strokeLinecap="round" strokeLinejoin="round"
+      />
+    ),
+    text: 'futureschooloffice@gmail.com',
+    href: 'mailto:futureschooloffice@gmail.com',
+  },
+  {
+    icon: (
+      <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+        strokeLinecap="round" strokeLinejoin="round"
+      />
+    ),
+    text: 'Ambur, Tamil Nadu',
+    href: '#',
+  },
+]
+
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [scrolled, setScrolled]       = useState(false)
+  const [drawerOpen, setDrawerOpen]   = useState(false)
+  const [topBarVisible, setTopBarVisible] = useState(true)
+  const lastY = useRef(0)
   const location = useLocation()
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+  /* scroll behaviour */
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY
+      setScrolled(y > 40)
+      // hide top-bar after 80px, show again near top
+      setTopBarVisible(y < 80)
+      lastY.current = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
-  const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'About', href: '/about' },
-    { name: 'Programs', href: '/programs' },
-    { name: 'Admissions', href: '/admissions' },
-    { name: 'Gallery', href: '/gallery' },
-    { name: 'Contact', href: '/contact' }
-  ]
+  /* close drawer on route change */
+  useEffect(() => setDrawerOpen(false), [location.pathname])
+
+  /* lock body scroll when drawer open */
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [drawerOpen])
+
+  const isActive = (href) =>
+    href === '/' ? location.pathname === '/' : location.pathname.startsWith(href)
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo & School Name */}
-          <div className="flex items-center space-x-3 cursor-pointer group">
-            <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center group-hover:shadow-lg transition">
-              <span className="text-white text-2xl font-bold">FS</span>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-blue-900">Future School</h1>
-              <p className="text-xs text-gray-500">CBSE Affiliated</p>
-            </div>
+    <>
+      {/* ════════════════════════════════════
+          TOP BAR
+      ════════════════════════════════════ */}
+      <div
+        className="bg-red-700 text-white overflow-hidden transition-all duration-500 ease-in-out"
+        style={{ maxHeight: topBarVisible ? '48px' : '0px', opacity: topBarVisible ? 1 : 0 }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between">
+          {/* Left — contact info */}
+          <div className="hidden sm:flex items-center gap-5">
+            {topBarItems.map(({ icon, text, href }) => (
+              <a
+                key={text}
+                href={href}
+                className="flex items-center gap-1.5 text-red-100 hover:text-white text-xs font-medium transition-colors duration-150"
+              >
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  {icon}
+                </svg>
+                {text}
+              </a>
+            ))}
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.href}
-                className={`px-3 py-2 text-sm font-medium rounded-lg transition ${
-                  location.pathname === link.href 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
+          {/* Mobile — just location */}
+          <div className="sm:hidden flex items-center gap-1.5 text-red-100 text-xs">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Ambur, Tamil Nadu
+          </div>
 
-          {/* CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-3">
-            <button className="px-4 py-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-lg transition text-sm">
-              Log In
-            </button>
-            <Link to="/admissions" className="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition text-sm">
-              Admission
+          {/* Right — affiliation badge */}
+          <div className="flex items-center gap-3">
+            <span className="hidden md:flex items-center gap-1.5 text-[0.65rem] font-bold tracking-widest uppercase text-red-200">
+              <span className="w-1 h-1 rounded-full bg-red-300" />
+              CBSE Affiliation No. 1930465
+              <span className="w-1 h-1 rounded-full bg-red-300" />
+              School Code: 55386
+            </span>
+            <Link
+              to="/admissions"
+              className="px-3 py-0.5 rounded-sm bg-white text-red-700 text-[0.65rem] font-bold tracking-wide hover:bg-red-50 transition-colors duration-150"
+            >
+              Admissions 2026–2027
             </Link>
           </div>
+        </div>
+      </div>
 
-          {/* Mobile Menu Button */}
+      {/* ════════════════════════════════════
+          MAIN HEADER
+      ════════════════════════════════════ */}
+      <header
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? 'bg-white/95 backdrop-blur-lg shadow-[0_4px_30px_rgba(0,0,0,0.08)]'
+            : 'bg-white border-b border-gray-100'
+        }`}
+      >
+        {/* Animated red underline */}
+        <div className="h-[3px] w-full bg-gradient-to-r from-red-800 via-red-500 to-red-800" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-[72px]">
+
+            {/* ── LOGO ── */}
+            <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
+              {/* Shield icon — replace inner content with <img> when logo is ready */}
+              <div className="relative w-12 h-12 flex-shrink-0">
+                {/* Outer ring */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-red-500 to-red-800 shadow-md group-hover:shadow-red-300/50 group-hover:shadow-lg transition-all duration-300" />
+                {/* Inner */}
+                <div className="absolute inset-[3px] rounded-[9px] bg-white/10 flex items-center justify-center">
+                  <span
+                    className="text-white text-lg font-black leading-none"
+                    style={{ fontFamily: "'Georgia', serif" }}
+                  >
+                    FS
+                  </span>
+                </div>
+                {/* Shine sweep on hover */}
+                <div className="absolute inset-0 rounded-xl overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                </div>
+              </div>
+
+              <div className="flex flex-col leading-none">
+                <span
+                  className="text-red-700 font-black text-lg uppercase tracking-wide leading-tight"
+                  style={{ fontFamily: "'Georgia', serif" }}
+                >
+                  Future
+                </span>
+                <span className="text-gray-500 text-[0.58rem] font-semibold tracking-[0.18em] uppercase mt-0.5">
+                  Senior Secondary School
+                </span>
+                <span className="text-gray-400 text-[0.52rem] font-medium tracking-[0.12em] uppercase">
+                  Ambur, Tamil Nadu
+                </span>
+              </div>
+            </Link>
+
+            {/* ── DESKTOP NAV ── */}
+            <nav className="hidden lg:flex items-center">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  className="relative px-4 py-2 group"
+                >
+                  <span
+                    className={`text-sm font-semibold tracking-wide transition-colors duration-200 ${
+                      isActive(link.href) ? 'text-red-600' : 'text-gray-600 group-hover:text-red-600'
+                    }`}
+                  >
+                    {link.name}
+                  </span>
+                  {/* Animated underline */}
+                  <span
+                    className={`absolute bottom-0 left-4 right-4 h-[2px] rounded-full bg-red-600 transition-all duration-300 ${
+                      isActive(link.href)
+                        ? 'opacity-100 scale-x-100'
+                        : 'opacity-0 scale-x-0 group-hover:opacity-100 group-hover:scale-x-100'
+                    }`}
+                  />
+                  {/* Active dot */}
+                  {isActive(link.href) && (
+                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-red-600" />
+                  )}
+                </Link>
+              ))}
+            </nav>
+
+            {/* ── DESKTOP CTAs ── */}
+            <div className="hidden lg:flex items-center gap-2.5">
+              {/* Portal button */}
+              <button className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-gray-500 border border-gray-200 rounded-lg hover:border-red-200 hover:text-red-600 hover:bg-red-50 transition-all duration-200">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Log In
+              </button>
+
+              {/* Admission CTA */}
+              <Link
+                to="/admissions"
+                className="relative flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-lg overflow-hidden group hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(185,28,28,0.35)] transition-all duration-200"
+              >
+                {/* Shine sweep */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-600" />
+                <svg className="w-4 h-4 relative z-10" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className="relative z-10">Apply Now</span>
+              </Link>
+            </div>
+
+            {/* ── MOBILE HAMBURGER ── */}
+            <button
+              onClick={() => setDrawerOpen(!drawerOpen)}
+              className="lg:hidden relative w-10 h-10 flex flex-col items-center justify-center gap-[5px] rounded-lg hover:bg-red-50 transition-colors duration-200"
+              aria-label="Toggle menu"
+            >
+              <span
+                className={`block w-5 h-[2px] bg-gray-700 rounded-full transition-all duration-300 origin-center ${
+                  drawerOpen ? 'rotate-45 translate-y-[7px]' : ''
+                }`}
+              />
+              <span
+                className={`block w-5 h-[2px] bg-gray-700 rounded-full transition-all duration-300 ${
+                  drawerOpen ? 'opacity-0 scale-x-0' : ''
+                }`}
+              />
+              <span
+                className={`block w-5 h-[2px] bg-gray-700 rounded-full transition-all duration-300 origin-center ${
+                  drawerOpen ? '-rotate-45 -translate-y-[7px]' : ''
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ════════════════════════════════════
+          MOBILE DRAWER OVERLAY
+      ════════════════════════════════════ */}
+      {/* Backdrop */}
+      <div
+        onClick={() => setDrawerOpen(false)}
+        className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      />
+
+      {/* Drawer panel */}
+      <div
+        className={`fixed top-0 right-0 z-50 h-full w-[300px] bg-white shadow-2xl transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${
+          drawerOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        {/* Drawer header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center shadow-sm">
+              <span className="text-white font-black text-sm" style={{ fontFamily: "'Georgia', serif" }}>FS</span>
+            </div>
+            <div>
+              <p className="text-red-700 font-black text-sm uppercase tracking-wide leading-tight">Future School</p>
+              <p className="text-gray-400 text-[0.55rem] font-semibold tracking-widest uppercase">Ambur</p>
+            </div>
+          </div>
           <button
-            onClick={toggleMenu}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
+            onClick={() => setDrawerOpen(false)}
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700"
           >
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden pb-4 space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.href}
-                onClick={() => setIsMenuOpen(false)}
-                className={`block px-4 py-2 text-sm font-medium rounded-lg transition ${
-                  location.pathname === link.href 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <div className="space-y-2 pt-2 border-t">
-              <button className="w-full px-4 py-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-lg transition text-sm">
-                Log In
-              </button>
-              <Link to="/admissions" onClick={() => setIsMenuOpen(false)} className="block w-full text-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition text-sm">
-                Admission
-              </Link>
-            </div>
+        {/* Nav links */}
+        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+          {navLinks.map((link, i) => (
+            <Link
+              key={link.name}
+              to={link.href}
+              style={{ transitionDelay: drawerOpen ? `${i * 40}ms` : '0ms' }}
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                isActive(link.href)
+                  ? 'text-red-600 bg-red-50'
+                  : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+              }`}
+            >
+              <span>{link.name}</span>
+              {isActive(link.href)
+                ? <span className="w-2 h-2 rounded-full bg-red-600" />
+                : <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+              }
+            </Link>
+          ))}
+        </nav>
+
+        {/* Drawer footer */}
+        <div className="px-4 pb-6 pt-4 border-t border-gray-100 space-y-3">
+          {/* Contact quick info */}
+          <div className="bg-gray-50 rounded-xl px-4 py-3 space-y-2">
+            <a href="tel:+919962826465" className="flex items-center gap-2 text-xs text-gray-500 hover:text-red-600 transition-colors">
+              <svg className="w-3.5 h-3.5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              +91 99628 26465
+            </a>
+            <a href="mailto:futureschooloffice@gmail.com" className="flex items-center gap-2 text-xs text-gray-500 hover:text-red-600 transition-colors">
+              <svg className="w-3.5 h-3.5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              futureschooloffice@gmail.com
+            </a>
           </div>
-        )}
+
+          <button className="w-full py-2.5 text-sm font-semibold text-gray-500 border border-gray-200 rounded-xl hover:border-red-200 hover:text-red-600 transition-all duration-200">
+            Log In
+          </button>
+          <Link
+            to="/admissions"
+            className="flex items-center justify-center gap-2 w-full py-3 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-colors duration-200"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Apply for Admission
+          </Link>
+        </div>
       </div>
-    </header>
+    </>
   )
 }

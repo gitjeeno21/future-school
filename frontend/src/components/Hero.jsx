@@ -1,62 +1,125 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Reveal } from '../utils/reveal'
+
+const heroSlides = [
+  { kicker: 'Est. 1998 · Ambur', heading: 'Shape Your\nBrightest\nFuture.', sub: 'Future Senior Secondary School — CBSE Affiliated, nurturing excellence for 25 years.' },
+  { kicker: 'Admissions 2026–27', heading: 'Every\nStudent\nBelongs.', sub: 'Smart classrooms, expert faculty, and a campus that inspires discovery every day.' },
+  { kicker: '25 Years of Trust',  heading: 'Academic\nExcellence,\nHolistic Growth.', sub: 'Limited seats available for Classes I–XII. Applications now open.' },
+]
+
 export default function Hero() {
+  const [heroIdx, setHeroIdx] = useState(0)
+  const [heroVisible, setHeroVisible] = useState(false)
+
+  useEffect(() => {
+    setTimeout(() => setHeroVisible(true), 60)
+    const t = setInterval(() => setHeroIdx(i => (i + 1) % heroSlides.length), 5500)
+    return () => clearInterval(t)
+  }, [])
+
+  const fd = (d) => ({
+    opacity: heroVisible ? 1 : 0,
+    transform: heroVisible ? 'none' : 'translateY(24px)',
+    transition: `opacity 1s cubic-bezier(0.16,1,0.3,1) ${d}ms, transform 1s cubic-bezier(0.16,1,0.3,1) ${d}ms`,
+  })
+
   return (
-    <section id="home" className="relative h-screen bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="white" strokeWidth="0.5"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
+    <>
+      <section className="relative h-screen min-h-[640px] max-h-[980px] overflow-hidden flex flex-col justify-between"
+        style={{ background: '#0d0d0d' }}>
 
-      {/* Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-        <div className="grid md:grid-cols-2 gap-8 w-full items-center">
-          {/* Left Content */}
-          <div className="text-white space-y-6">
-            <div className="inline-block bg-blue-500 bg-opacity-30 px-4 py-2 rounded-full text-sm font-semibold">
-              Excellence in Education
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-              Shape the Future Leaders
-            </h1>
-            <p className="text-xl text-blue-100 leading-relaxed">
-              A CBSE-affiliated institution committed to providing world-class education with modern pedagogy and holistic development.
-            </p>
-            <div className="flex gap-4 pt-4">
-              <button className="px-8 py-3 bg-white text-blue-700 font-bold rounded-lg hover:shadow-2xl hover:scale-105 transition transform">
-                Get Admission
-              </button>
-              <button className="px-8 py-3 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-blue-700 transition">
-                Learn More
-              </button>
-            </div>
+        {/* Noise overlay */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundSize: '160px' }} />
+
+        {/* Crimson glow */}
+        <div className="absolute pointer-events-none select-none"
+          style={{ bottom: '-10%', left: '-10%', width: '60vw', height: '60vw', maxWidth: 700, maxHeight: 700, background: 'radial-gradient(circle, rgba(192,57,43,0.16) 0%, transparent 68%)', borderRadius: '50%' }} />
+
+        {/* Top bar */}
+        <div style={fd(0)} className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-8">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 flex items-center justify-center text-white font-black text-sm serif"
+              style={{ background: '#c0392b' }}>FS</div>
+            <span className="text-white/50 text-xs tracking-[0.2em] uppercase font-medium">Future School</span>
           </div>
-
-          {/* Right Image/Illustration */}
-          <div className="hidden md:block">
-            <div className="relative w-full h-96 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl shadow-2xl flex items-center justify-center">
-              {/* Placeholder for image - can be replaced with actual image */}
-              <svg className="w-4/5 h-4/5 text-blue-200" fill="currentColor" viewBox="0 0 100 100">
-                <rect x="10" y="10" width="80" height="60" rx="5"/>
-                <circle cx="35" cy="35" r="8" fill="white" opacity="0.5"/>
-                <circle cx="65" cy="45" r="12" fill="white" opacity="0.5"/>
-              </svg>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-white/35 text-xs tracking-wider">Admissions Open</span>
           </div>
         </div>
-      </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce text-white">
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
+        {/* Headline */}
+        <div className="relative z-10 px-6 md:px-12">
+          <div style={fd(100)} className="mb-3">
+            <span className="text-white/30 text-xs tracking-[0.28em] uppercase font-medium">{heroSlides[heroIdx].kicker}</span>
+          </div>
+          <h1 className="serif text-white mb-6 leading-[0.96] tracking-tight whitespace-pre-line" style={{ fontSize: 'clamp(3rem, 8vw, 7rem)', ...fd(200) }}>
+            {heroSlides[heroIdx].heading}
+          </h1>
+          <div style={fd(340)} className="max-w-sm">
+            <p className="text-sm leading-relaxed font-light" style={{ color: 'rgba(255,255,255,0.4)' }}>{heroSlides[heroIdx].sub}</p>
+          </div>
+          <div style={fd(440)} className="flex items-center gap-4 mt-8">
+            <Link to="/admissions"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-px hover:brightness-110"
+              style={{ background: '#c0392b' }}>
+              Apply Now
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div style={fd(580)} className="relative z-10 flex items-end justify-between px-6 md:px-12 pb-8 pt-8">
+          <div className="flex items-center gap-8">
+            {[['3,000+', 'Students'], ['97.8%', 'Pass Rate'], ['25 yrs', 'Legacy']].map(([n, l]) => (
+              <div key={l} className="flex flex-col gap-1">
+                <span className="serif text-white text-xl font-normal leading-none">{n}</span>
+                <span className="text-[0.58rem] tracking-[0.2em] uppercase" style={{ color: 'rgba(255,255,255,0.22)' }}>{l}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            {heroSlides.map((_, i) => (
+              <button key={i} onClick={() => setHeroIdx(i)}
+                style={{
+                  width: i === heroIdx ? '2rem' : '0.4rem',
+                  height: '2px',
+                  background: i === heroIdx ? '#c0392b' : 'rgba(255,255,255,0.2)',
+                  transition: 'all 0.4s ease',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Side label */}
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center gap-4 z-10">
+          <div className="w-px h-14" style={{ background: 'rgba(255,255,255,0.08)' }} />
+          <span className="text-[0.52rem] tracking-[0.35em] uppercase"
+            style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', color: 'rgba(255,255,255,0.18)' }}>
+            Ambur · Tamil Nadu
+          </span>
+          <div className="w-px h-14" style={{ background: 'rgba(255,255,255,0.08)' }} />
+        </div>
+      </section>
+
+      {/* ══ TICKER ══ */}
+      <div style={{ background: '#c0392b' }} className="py-2.5 overflow-hidden">
+        <div className="ticker-track flex gap-16 whitespace-nowrap">
+          {[...Array(2)].flatMap((_, ri) =>
+            ['🏆 District Kabaddi Champions 2025', '📚 97.8% Board Pass Rate 2024', '🔬 5 Students — National Olympiad Top 100', '🎭 State Cultural Fest First Prize', '🥇 Athletics Championship — 3 Gold', '📋 Admissions Open 2026–27 · Limited Seats']
+              .map((t, i) => <span key={`${ri}-${i}`} className="text-white text-xs font-semibold tracking-wide flex-shrink-0">{t}</span>)
+          )}
+        </div>
       </div>
-    </section>
+    </>
   )
 }
